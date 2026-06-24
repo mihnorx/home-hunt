@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeHunt | System Management Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { background-color: #F0F4F8; color: #1E3A8A; }
+        .pro-panel { background-color: #FFFFFF; border: 1px solid #D1D5DB; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="antialiased flex min-h-screen flex-col md:flex-row" x-data="dashboardWorkspaceApp()">
+
+    <aside class="w-full md:w-72 bg-[#0B2545] text-white flex flex-col justify-between p-6 shrink-0">
+        <div class="space-y-8">
+            <div class="flex items-center gap-3 border-b border-blue-900 pb-4">
+                <div class="w-10 h-10 rounded-md bg-[#134074] flex items-center justify-center font-bold text-white text-xl">M</div>
+                <div>
+                    <span class="text-sm font-bold uppercase block tracking-wider" x-text="sessionRole + ' Center'"></span>
+                    <span class="text-[10px] text-slate-300 block">System Verification Console</span>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <div class="bg-[#134074] text-white font-bold p-3 text-xs uppercase tracking-wider rounded">
+                    📋 Active Data Registries
+                </div>
+                <button @click="terminateSession" class="w-full text-left text-red-300 hover:bg-blue-900 p-3 text-xs uppercase tracking-wider transition-all mt-4 rounded">
+                    🚪 Terminate Session
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-10 space-y-6 overflow-y-auto">
+        <div class="border-b border-gray-300 pb-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-slate-900 uppercase" x-text="sessionRole === 'admin' ? 'Admin / Booking Confirmation Stream' : 'Owner Portfolio Workspace'"></h1>
+            <a href="index.html" class="bg-[#134074] text-white text-xs px-4 py-2 rounded shadow hover:bg-[#0B2545]">← Live Web View</a>
+        </div>
+
+        <div x-show="sessionRole === 'admin'" class="space-y-6">
+            <div class="pro-panel p-6 rounded space-y-4">
+                <h3 class="text-xs uppercase tracking-wider font-bold text-slate-500">Live Acquisition Pipelines</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-gray-200">
+                                <th class="p-3 font-bold">Client Target</th>
+                                <th class="p-3 font-bold">Property Unit Scope</th>
+                                <th class="p-3 font-bold">Inquiry Message</th>
+                                <th class="p-3 font-bold">Current Status</th>
+                                <th class="p-3 font-bold text-right">Execution Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <template x-for="i in inquiries" :key="i.id">
+                                <tr class="hover:bg-slate-50 font-sans">
+                                    <td class="p-3 font-bold text-slate-900" x-text="i.name"></td>
+                                    <td class="p-3 text-slate-700 font-semibold" x-text="i.roomTitle"></td>
+                                    <td class="p-3 text-slate-500 italic" x-text="i.msg"></td>
+                                    <td class="p-3">
+                                        <span :class="i.status === 'Confirmed' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'" class="px-2 py-0.5 rounded font-bold text-[10px]" x-text="i.status === 'Confirmed' ? 'BOOKED / SOLD' : 'PENDING'"></span>
+                                    </td>
+                                    <td class="p-3 text-right">
+                                        <button x-show="i.status === 'Pending'" @click="confirmOrder(i)" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded transition-all shadow">
+                                            Confirm Order & Lock Booking
+                                        </button>
+                                        <span x-show="i.status === 'Confirmed'" class="text-red-600 font-black text-[11px] tracking-wide block">✓ STATE MUTATED TO BOOKED</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="sessionRole === 'owner'" class="space-y-6" style="display: none;">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="pro-panel p-6 rounded space-y-4 lg:col-span-1">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-gray-100 pb-2">Deploy New Property Unit</h3>
+                    
+                    <form @submit.prevent="createNewListing" class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Asset Custom Title</label>
+                            <input type="text" x-model="newRoom.title" required placeholder="e.g. 5 Marla Premium House" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Location Hub</label>
+                            <input type="text" x-model="newRoom.location" required placeholder="e.g. Johar Town" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Allocation Size / Dimensions</label>
+                            <input type="text" x-model="newRoom.dimensions" required placeholder="e.g. 5 Marla Double Floor" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Rate Amount (PKR)</label>
+                                <input type="number" x-model="newRoom.price" required placeholder="e.g. 45000" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Ecosystem Nature</label>
+                                <select x-model="newRoom.type" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50">
+                                    <option value="Rent">Rent</option>
+                                    <option value="Sale">Sale</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Integrated Luxury Facilities</label>
+                            <input type="text" x-model="newRoom.facilities" required placeholder="Media Wall, Split AC, Wardrobes" class="w-full border border-gray-300 p-2 text-xs rounded bg-slate-50" />
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Media Upload Asset Pipeline (Gallery)</label>
+                            <div class="border-2 border-dashed border-blue-400 p-4 text-center cursor-pointer hover:bg-blue-50 relative rounded bg-slate-50 transition-all">
+                                <input type="file" accept="image/*,video/*" multiple @change="captureMediaFilesStream" class="absolute inset-0 opacity-0 cursor-pointer" />
+                                <span class="text-xs text-blue-700 font-bold block">📁 Access Native Device Gallery</span>
+                                <span class="text-[10px] text-slate-500 block mt-1" x-text="uploadedImagesUrls.length > 0 ? uploadedImagesUrls.length + ' Photos Loaded Successfully' : 'Select Photos/Videos Preview'"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-[#134074] hover:bg-[#0B2545] text-white font-bold py-2.5 text-xs uppercase tracking-widest rounded shadow transition-all mt-2">Publish Asset Broad-scale</button>
+                    </form>
+                </div>
+
+                <div class="pro-panel p-6 rounded lg:col-span-2 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Live Stream Portfolio</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="r in rooms" :key="r.id">
+                            <div class="bg-slate-50 border border-gray-200 p-4 rounded flex flex-col justify-between font-sans">
+                                <div>
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h4 class="font-bold text-sm text-slate-900" x-text="r.title"></h4>
+                                        <span :class="r.bookingStatus === 'Booked' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'" class="text-[9px] font-bold px-2 py-0.5 rounded uppercase" x-text="r.bookingStatus"></span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 font-medium" x-text="'📍 Hub Sector: ' + r.location"></p>
+                                    <p class="text-[11px] text-slate-500 mt-2 bg-white p-1.5 rounded border border-gray-100" x-text="'Specs: ' + r.facilities"></p>
+                                </div>
+                                <div class="mt-4 pt-2 border-t border-gray-200 text-right">
+                                    <span class="font-black text-xs text-[#0B2545]" x-text="'PKR ' + parseInt(r.price).toLocaleString() + ' /-'"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function dashboardWorkspaceApp() {
+            return {
+                sessionRole: 'guest', inquiries: [], rooms: [], uploadedImagesUrls: [],
+                newRoom: { title: '', location: '', dimensions: '', price: '', type: 'Rent', facilities: '' },
+                init() {
+                    this.sessionRole = localStorage.getItem('active_session_role') || 'guest';
+                    if (this.sessionRole === 'guest') { window.location.href = 'login.html'; }
+                    this.inquiries = JSON.parse(localStorage.getItem('master_inquiries') || '[]');
+                    this.rooms = JSON.parse(localStorage.getItem('global_rooms_data') || '[]');
+                },
+                captureMediaFilesStream(e) {
+                    const files = e.target.files;
+                    this.uploadedImagesUrls = [];
+                    for (let i = 0; i < files.length; i++) {
+                        // Dynamically append temporary image/video URLs into instance array buffer
+                        this.uploadedImagesUrls.push(URL.createObjectURL(files[i]));
+                    }
+                },
+                createNewListing() {
+                    // Fallback to beautiful placeholder photography url if device upload stack was skipped
+                    let finalImages = this.uploadedImagesUrls.length > 0 ? this.uploadedImagesUrls : ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=80'];
+                    
+                    let freshUnit = {
+                        id: Date.now(), title: this.newRoom.title, location: this.newRoom.location,
+                        dimensions: this.newRoom.dimensions, price: this.newRoom.price, type: this.newRoom.type,
+                        bookingStatus: 'Available', facilities: this.newRoom.facilities, images: finalImages
+                    };
+                    this.rooms.unshift(freshUnit);
+                    localStorage.setItem('global_rooms_data', JSON.stringify(this.rooms));
+                    alert('New luxury listing published into verified arrays!');
+                    this.newRoom = { title: '', location: '', dimensions: '', price: '', type: 'Rent', facilities: '' };
+                    this.uploadedImagesUrls = [];
+                },
+                confirmOrder(inquiry) {
+                    inquiry.status = 'Confirmed';
+                    localStorage.setItem('master_inquiries', JSON.stringify(this.inquiries));
+
+                    let globalRooms = JSON.parse(localStorage.getItem('global_rooms_data') || '[]');
+                    let roomIdx = globalRooms.findIndex(r => r.id === inquiry.roomId);
+                    if (roomIdx !== -1) {
+                        globalRooms[roomIdx].bookingStatus = 'Booked';
+                        localStorage.setItem('global_rooms_data', JSON.stringify(globalRooms));
+                    }
+                    alert('Acquisition pipeline validated! Status flag written as BOOKED.');
+                    this.rooms = globalRooms;
+                },
+                terminateSession() {
+                    localStorage.removeItem('active_session_role');
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

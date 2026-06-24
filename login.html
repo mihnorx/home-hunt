@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeHunt | Portal Authorization Secure Gate</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { background-color: #F0F4F8; color: #1E3A8A; }
+        .gate-card { background-color: #FFFFFF; border: 1px solid #D1D5DB; box-shadow: 0 10px 25px -5px rgba(11,37,69,0.1); }
+    </style>
+</head>
+<body class="antialiased flex items-center justify-center min-h-screen p-4" x-data="loginSystemApp()">
+
+    <div class="w-full max-w-md gate-card p-8 space-y-6 rounded">
+        <div class="text-center space-y-2">
+            <div class="w-12 h-12 bg-[#0B2545] text-white flex items-center justify-center font-bold text-xl rounded shadow mx-auto">HH</div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Portal Access Control</h2>
+            <p class="text-xs text-slate-500 font-mono">Verify identity role signature to proceed</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded border border-gray-200">
+            <button type="button" @click="role = 'admin'; authError = false;" :class="role === 'admin' ? 'bg-[#134074] text-white font-bold' : 'text-slate-600'" class="py-2 text-xs uppercase font-bold tracking-wider transition-all rounded">⚙️ Admin Control</button>
+            <button type="button" @click="role = 'owner'; authError = false;" :class="role === 'owner' ? 'bg-[#134074] text-white font-bold' : 'text-slate-600'" class="py-2 text-xs uppercase font-bold tracking-wider transition-all rounded">👤 Asset Owner</button>
+        </div>
+
+        <form @submit.prevent="authenticateRole" class="space-y-4">
+            <div>
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-600 mb-1">Ecosystem Username ID</label>
+                <input type="text" x-model="username" required placeholder="Enter login identifier..." class="w-full bg-slate-50 border border-gray-300 p-2.5 text-xs focus:outline-none focus:border-[#134074] text-slate-900 rounded" />
+            </div>
+            <div>
+                <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-600 mb-1">Ecosystem Security Key</label>
+                <input type="password" x-model="password" required placeholder="••••••••" class="w-full bg-slate-50 border border-gray-300 p-2.5 text-xs focus:outline-none focus:border-[#134074] text-slate-900 rounded" />
+            </div>
+
+            <p x-show="authError" class="text-[11px] text-red-600 font-mono text-center font-semibold">Security authentication rejected: Key mismatched.</p>
+
+            <button type="submit" class="w-full bg-[#134074] text-white text-xs font-bold uppercase tracking-widest py-3 transition-colors hover:bg-[#0B2545] rounded shadow">
+                Execute Identity Authorization
+            </button>
+        </form>
+
+        <div class="text-center pt-2 border-t border-gray-200">
+            <a href="index.html" class="text-xs text-[#134074] font-semibold hover:underline">← Cancel & Return to Public Showrooms</a>
+        </div>
+    </div>
+
+    <script>
+        function loginSystemApp() {
+            return {
+                role: 'admin', username: '', password: '', authError: false,
+                authenticateRole() {
+                    // Credentials matrix system definitions (admin/admin123 , owner/owner123)
+                    if (this.role === 'admin' && this.username === 'admin' && this.password === 'admin123') {
+                        localStorage.setItem('active_session_role', 'admin');
+                        window.location.href = 'dashboard.html';
+                    } else if (this.role === 'owner' && this.username === 'owner' && this.password === 'owner123') {
+                        localStorage.setItem('active_session_role', 'owner');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        this.authError = true;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
